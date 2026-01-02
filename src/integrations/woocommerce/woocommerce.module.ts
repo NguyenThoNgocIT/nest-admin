@@ -22,6 +22,6 @@ import { WooCommerceAdapter } from './woocommerce.adapter'
     OrderService,
     WooCommerceAdapter,
   ],
-  exports: [WooCommerceAdapter, ProductService, OrderService],
+  exports: [WooCommerceAdapter, ProductService, OrderService, StoreCredentialsService],
 })
 export class WooCommerceModule {}

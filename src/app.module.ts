@@ -14,28 +14,28 @@ import { AllExceptionsFilter } from './common/filters/any-exception.filter'
 import { IdempotenceInterceptor } from './common/interceptors/idempotence.interceptor'
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
+import { OdooModule } from './integrations/odoo/odoo.module'
+import { PrintifyModule } from './integrations/printify/printify.module'
+import { ShopifyModule } from './integrations/shopify/shopify.module'
+import { TiktokModule } from './integrations/tiktok/tiktok.module'
 import { WooCommerceModule } from './integrations/woocommerce/woocommerce.module'
+
 import { AuthModule } from './modules/auth/auth.module'
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard'
 import { RbacGuard } from './modules/auth/guards/rbac.guard'
+
 import { HealthModule } from './modules/health/health.module'
 
 import { NetdiskModule } from './modules/netdisk/netdisk.module'
-import { OdooModule } from './modules/odoo/odoo.module'
-import { ShopifyModule } from './modules/shopify/shopify.module'
-
 import { SseModule } from './modules/sse/sse.module'
 
 import { SystemModule } from './modules/system/system.module'
 import { TasksModule } from './modules/tasks/tasks.module'
-
 import { TodoModule } from './modules/todo/todo.module'
 import { ToolsModule } from './modules/tools/tools.module'
 import { DatabaseModule } from './shared/database/database.module'
-import { SocketModule } from './socket/socket.module'
-import { TiktokModule } from './modules/tiktok/tiktok.module'
 import { RedisModule } from './shared/redis/redis.module'
-import { PrintifyModule } from './modules/printify/printify.module'
+import { SocketModule } from './socket/socket.module'
 
 @Module({
   imports: [
@@ -75,7 +75,7 @@ import { PrintifyModule } from './modules/printify/printify.module'
     RedisModule,
     WooCommerceModule,
     ShopifyModule,
-    PrintifyModule
+    PrintifyModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

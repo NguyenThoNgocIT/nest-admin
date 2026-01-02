@@ -1,43 +1,27 @@
 import { Module } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api'
-import { AuthModule } from '~/modules/auth/auth.module'
-import { WOOCOMMERCE_API_INSTANCE } from '../constants'
-import { CouponController } from './woocommerce.controller/coupon.controller'
-import { ProductController } from './woocommerce.controller/product.controller'
-import { CouponService } from './woocommerce.service/coupon.service'
-
-import { ProductService } from './woocommerce.service/product.service'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { OrderController } from './controllers/order.controller'
+import { ProductController } from './controllers/product.controller'
+import { StoreController } from './controllers/store.controller'
+import { WooCommerceOrderEntity } from './entities/woocommerce-order.entity'
+import { WooCommerceProductEntity } from './entities/woocommerce-product.entity'
+import { WooCommerceStoreEntity } from './entities/woocommerce-store.entity'
+import { OrderService } from './services/order.service'
+import { ProductService } from './services/product.service'
+import { StoreCredentialsService } from './services/store-credentials.service'
+import { WooCommerceClientService } from './services/woocommerce-client.service'
+import { WooCommerceAdapter } from './woocommerce.adapter'
 
 @Module({
-  imports: [AuthModule],
-  controllers: [/// khai báo controller ở đây
-    ProductController,
-    CouponController,
-  ],
+  imports: [TypeOrmModule.forFeature([WooCommerceStoreEntity, WooCommerceProductEntity, WooCommerceOrderEntity])],
+  controllers: [ProductController, OrderController, StoreController],
   providers: [
-    {
-      provide: WOOCOMMERCE_API_INSTANCE,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const url = configService.get('WOOCOMMERCE_URL') || process.env.WOOCOMMERCE_URL
-        const version = configService.get('WOOCOMMERCE_API_VERSION') || process.env.WOOCOMMERCE_API_VERSION || 'wc/v3'
-        console.log('🚀 WooCommerce API URL:', `${url}/${version}`)
-
-        return new WooCommerceRestApi({
-          url,
-          consumerKey: configService.get('WOOCOMMERCE_KEY'),
-          consumerSecret: configService.get('WOOCOMMERCE_SECRET'),
-          version,
-          queryStringAuth: configService.get('WOOCOMMERCE_QUERY_STRING_AUTH') === 'true',
-        })
-      },
-    },
+    StoreCredentialsService,
+    WooCommerceClientService,
     ProductService,
-    CouponService,
+    OrderService,
+    WooCommerceAdapter,
   ],
-  // Nhớ export service để các module khác có thể dùng
-  exports: [ProductService, CouponService, WOOCOMMERCE_API_INSTANCE],
-
+  exports: [WooCommerceAdapter, ProductService, OrderService],
 })
 export class WooCommerceModule {}

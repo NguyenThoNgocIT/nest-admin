@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { OdooService } from '../odoo/odoo.service'
+import { OdooService } from '../../integrations/odoo/odoo.service'
 import { MenuModule } from '../system/menu/menu.module'
 import { ParamConfigModule } from '../system/param-config/param-config.module'
 

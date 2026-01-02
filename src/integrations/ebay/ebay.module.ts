@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { ConfigService } from '@nestjs/config'
 import EbayAuthToken from 'ebay-oauth-nodejs-client'
-import { EBAY_API_INSTANCE } from '../constants'
+import { EBAY_API_INSTANCE } from './constants'
 
 @Module({
   imports: [],

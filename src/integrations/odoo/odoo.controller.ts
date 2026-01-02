@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import { Public } from '../auth/decorators/public.decorator'/// sau khi kiểm tra fix lại đc xác thực thì xoá dòng này đi k nên để
+import { Public } from '../../modules/auth/decorators/public.decorator'/// sau khi kiểm tra fix lại đc xác thực thì xoá dòng này đi k nên để
 import { OdooPartnerData, OdooService } from './odoo.service'
 
 @ApiTags('Odoo')

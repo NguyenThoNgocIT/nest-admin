@@ -14,10 +14,7 @@ import { AllExceptionsFilter } from './common/filters/any-exception.filter'
 import { IdempotenceInterceptor } from './common/interceptors/idempotence.interceptor'
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
-import { OdooModule } from './integrations/odoo/odoo.module'
-import { PrintifyModule } from './integrations/printify/printify.module'
 import { ShopifyModule } from './integrations/shopify/shopify.module'
-import { TiktokModule } from './integrations/tiktok/tiktok.module'
 import { WooCommerceModule } from './integrations/woocommerce/woocommerce.module'
 
 import { AuthModule } from './modules/auth/auth.module'
@@ -70,12 +67,9 @@ import { SocketModule } from './socket/socket.module'
     SseModule,
     NetdiskModule,
     TodoModule,
-    OdooModule,
-    TiktokModule,
     RedisModule,
     WooCommerceModule,
     ShopifyModule,
-    PrintifyModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

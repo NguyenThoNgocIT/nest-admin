@@ -18,8 +18,6 @@ import { RegisterDto } from '~/modules/auth/dto/auth.dto'
 import { QQService } from '~/shared/helper/qq.service'
 import { md5, randomValue } from '~/utils'
 
-import { OdooPartnerData, OdooService } from '../../integrations/odoo/odoo.service'
-
 import { AccessTokenEntity } from '../auth/entities/access-token.entity'
 import { DeptEntity } from '../system/dept/dept.entity'
 import { ParamConfigService } from '../system/param-config/param-config.service'
@@ -42,7 +40,6 @@ export class UserService {
     @InjectEntityManager() private entityManager: EntityManager,
     private readonly paramConfigService: ParamConfigService,
     private readonly qqService: QQService,
-    private readonly OdooService: OdooService,
   ) {}
 
   // Tìm người dùng theo ID, chỉ trả về nếu đang kích hoạt
@@ -126,7 +123,7 @@ export class UserService {
     await this.upgradePasswordV(user.id)
   }
 
-  // Tạo mới người dùng + đồng bộ với Odoo
+  // Tạo mới người dùng
   async create({
     username,
     password,
@@ -160,22 +157,8 @@ export class UserService {
 
       await manager.save(u)
     })
-
-    // Đồng bộ người dùng với Odoo
-    try {
-      const odooData: OdooPartnerData = {
-        name: data.nickname || username,
-        email: data.email,
-        phone: data.phone,
-      }
-      await this.OdooService.syncPartner(odooData)
-    }
-    catch (error) {
-      console.log(`failed to sync  new user  ${username} to odoo.`, error.stack)
-    }
   }
 
-  // Cập nhật người dùng: thông tin, roles, phòng ban
   async update(
     id: number,
     { password, deptId, roleIds, status, ...data }: UserUpdateDto,
@@ -230,23 +213,11 @@ export class UserService {
     return user
   }
 
-  // Xóa người dùng (và đồng bộ hủy hoạt động Odoo nếu có email)
+  // Xóa người dùng
   async delete(userIds: number[]): Promise<void> {
     const rootUserId = await this.findRootUserId()
     if (userIds.includes(rootUserId))
       throw new BadRequestException('Không thể xóa người dùng root!')
-
-    const usersToDelete = await this.userRepository.findBy({ id: In(userIds) })
-    for (const user of usersToDelete) {
-      if (user.email) {
-        try {
-          await this.OdooService.deactivatePartnerByEmail(user.email)
-        }
-        catch (error) {
-          this.logger.error(`Failed to deactivate Odoo partner for user ID ${user.id}.`, error.stack)
-        }
-      }
-    }
 
     await this.userRepository.delete(userIds)
   }

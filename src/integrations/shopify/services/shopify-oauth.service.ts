@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -17,8 +18,9 @@ export class ShopifyOAuthService {
   /**
    * Tạo URL để redirect user sang trang cấp quyền của Shopify
    * @param shop Tên shop (vd: my-store.myshopify.com)
+   * @param userId ID của user đang login
    */
-  async generateAuthUrl(shop: string): Promise<string> {
+  async generateAuthUrl(shop: string, userId: number): Promise<string> {
     const shopify = this.shopifyClient.getShopifyInstance()
     const cleanShop = shopify.utils.sanitizeShop(shop, true)
 
@@ -26,45 +28,21 @@ export class ShopifyOAuthService {
       throw new Error('Invalid shop domain')
     }
 
-    // Bắt đầu quy trình OAuth
-    // begin() trả về Promise<void> và tự handle response nếu truyền rawRequest/rawResponse
-    // Nhưng ở đây ta muốn lấy URL để trả về cho frontend redirect
-    // Nên ta dùng begin() nhưng không truyền req/res, mà chỉ lấy url từ return (nếu library support)
-    // Hoặc dùng method khác.
-    // Với @shopify/shopify-api v10+, auth.begin() chủ yếu dùng cho Node server (Express/Koa)
-    // Tuy nhiên, ta có thể tự construct URL nếu cần, hoặc dùng begin() với mock req/res nếu library bắt buộc.
-
-    // Cách chuẩn: Dùng shopify.auth.begin() nhưng ta cần URL.
-    // Thực tế shopify.auth.begin() sẽ set header Location và status 302 cho rawResponse.
-    // Vì NestJS controller trả về string URL hoặc redirect object, ta cần trick một chút hoặc dùng cách khác.
-
-    // Tuy nhiên, để đơn giản và đúng chuẩn library, ta sẽ để controller gọi service này,
-    // và service này trả về URL.
-    // Library @shopify/shopify-api không expose hàm getAuthUrl public dễ dàng mà nằm trong begin().
-
-    // Workaround: Tự construct URL (dễ nhưng rủi ro nếu library đổi logic)
-    // Hoặc mock request/response object để bắt lấy URL redirect.
-
-    // Nhưng chờ đã, ta có thể dùng `shopify.auth.begin` và để nó throw redirect error hoặc ta tự build URL.
     // URL format: https://{shop}/admin/oauth/authorize?client_id={apiKey}&scope={scopes}&redirect_uri={redirectUri}&state={nonce}
 
     const isOnline = false // Offline access token (vĩnh viễn) cho background jobs
 
     // Tự build URL để control tốt hơn trong môi trường API (Frontend tách rời Backend)
     const redirectUri = `${process.env.APP_BASE_URL}/api/integrations/shopify/oauth/callback`
-    const state = shopify.utils.nonce()
 
-    const authUrl = await shopify.auth.getEmbeddedAppUrl({
-      rawRequest: {} as any, // Hacky, but getEmbeddedAppUrl might not be what we want for OAuth initiation
-      rawResponse: {} as any,
-    }).catch(() => null) // Ignore error
+    // Gắn userId vào state để lấy lại ở callback. Format: nonce_userId
+    // Fix: shopify.utils.nonce() might be unavailable in some versions, using crypto instead.
+    const nonce = crypto.randomBytes(16).toString('hex')
+    const state = `${nonce}__${userId}`
 
-    // Fallback: Manual construction (Safe & Standard)
+    // Manual construction (Safe & Standard)
     const scopes = process.env.SHOPIFY_SCOPES || 'read_products,write_products,read_orders,write_orders'
     const url = `https://${cleanShop}/admin/oauth/authorize?client_id=${process.env.SHOPIFY_API_KEY}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&grant_options[]=${isOnline ? 'per-user' : ''}`
-
-    // Lưu state vào DB tạm hoặc Cache để verify callback (Optional nhưng recommended security)
-    // Ở đây ta tạm bỏ qua bước lưu state phức tạp, nhưng production nên có.
 
     return url
   }
@@ -85,13 +63,8 @@ export class ShopifyOAuthService {
     // Cần construct session object giả lập
 
     try {
-      const sessionId = shopify.session.getOfflineId(cleanShop)
-      const session = new shopify.session.Session({
-        id: sessionId,
-        shop: cleanShop,
-        state,
-        isOnline: false,
-      })
+      // Note: Session object creation removed as it caused "not a constructor" error
+      // and is not needed for manual token exchange below.
 
       // Token exchange
       // Note: @shopify/shopify-api v9+ thay đổi cách exchange.
@@ -99,6 +72,10 @@ export class ShopifyOAuthService {
 
       // Manual Token Exchange (Gọn nhẹ hơn việc mock req/res cho library)
       const accessToken = await this.exchangeCodeForToken(cleanShop, code)
+
+      // Extract userId from state
+      const parts = state ? state.split('__') : []
+      const userId = parts.length > 1 ? Number.parseInt(parts[1]) : null
 
       // Lưu vào DB
       let store = await this.storeRepository.findOne({ where: { shopDomain: cleanShop } })
@@ -111,6 +88,10 @@ export class ShopifyOAuthService {
       store.scopes = process.env.SHOPIFY_SCOPES
       store.isActive = true
       store.state = state // Lưu state lần cuối (audit)
+
+      if (userId) {
+        store.userId = userId
+      }
 
       return await this.storeRepository.save(store)
     }

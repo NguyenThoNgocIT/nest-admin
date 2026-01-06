@@ -23,6 +23,9 @@ export class ShopifyStoreEntity {
   @Column({ nullable: true })
   shopName: string
 
+  @Column({ name: 'user_id', nullable: true })
+  userId: number
+
   @Column({ nullable: true })
   email: string
 

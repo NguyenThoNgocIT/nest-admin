@@ -1,6 +1,16 @@
 import antfu from '@antfu/eslint-config'
 
 export default antfu({
+  ignores: [
+    '**/dist',
+    '**/node_modules',
+    '**/coverage',
+    '**/generated',
+    '**/__data',
+    '**/logs',
+    '**/scripts',
+    '**/types',
+  ],
   stylistic: {
     indent: 2,
     quotes: 'single',

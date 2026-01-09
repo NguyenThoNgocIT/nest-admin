@@ -14,6 +14,7 @@ import { AllExceptionsFilter } from './common/filters/any-exception.filter'
 import { IdempotenceInterceptor } from './common/interceptors/idempotence.interceptor'
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
+import { EbayModule } from './integrations/ebay/ebay.module'
 import { EtsyModule } from './integrations/etsy/etsy.module'
 import { ShopifyModule } from './integrations/shopify/shopify.module'
 import { WooCommerceModule } from './integrations/woocommerce/woocommerce.module'
@@ -72,6 +73,7 @@ import { SocketModule } from './socket/socket.module'
     WooCommerceModule,
     ShopifyModule,
     EtsyModule,
+    EbayModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

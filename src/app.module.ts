@@ -17,6 +17,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { EbayModule } from './integrations/ebay/ebay.module'
 import { EtsyModule } from './integrations/etsy/etsy.module'
 import { ShopifyModule } from './integrations/shopify/shopify.module'
+import { TikTokSellerModule } from './integrations/tiktok-seller/tiktok-seller.module'
 import { WooCommerceModule } from './integrations/woocommerce/woocommerce.module'
 
 import { AuthModule } from './modules/auth/auth.module'
@@ -74,6 +75,7 @@ import { SocketModule } from './socket/socket.module'
     ShopifyModule,
     EtsyModule,
     EbayModule,
+    TikTokSellerModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

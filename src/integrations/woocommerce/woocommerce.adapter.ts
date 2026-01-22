@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CouponService } from './services/coupon.service'
+import { CustomerService } from './services/customer.service'
 import { OrderService } from './services/order.service'
 import { ProductService } from './services/product.service'
 
@@ -9,6 +10,7 @@ export class WooCommerceAdapter {
     private readonly productService: ProductService,
     private readonly orderService: OrderService,
     private readonly couponService: CouponService,
+    private readonly customerService: CustomerService,
   ) {}
 
   async syncProducts(storeId: number) {
@@ -21,5 +23,9 @@ export class WooCommerceAdapter {
 
   async syncCoupons(storeId: number) {
     return this.couponService.syncCoupons(storeId)
+  }
+
+  async syncCustomers(storeId: number) {
+    return this.customerService.syncCustomers(storeId)
   }
 }

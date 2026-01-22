@@ -1,26 +1,21 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity('woocommerce_products')
-export class WooCommerceProductEntity {
+@Entity('woocommerce_product_variations')
+export class WooCommerceProductVariationEntity {
   @PrimaryGeneratedColumn()
   id: number
 
   @Index()
   @Column()
-  storeId: number
+  store_id: number
 
   @Index()
   @Column()
-  wcId: number // WooCommerce Product ID
+  product_id: number // Parent Product Class ID
 
+  @Index()
   @Column()
-  name: string
-
-  @Column({ nullable: true })
-  slug: string
-
-  @Column({ nullable: true })
-  permalink: string
+  variation_id: number // WooCommerce Variation ID
 
   @Column({ type: 'timestamp', nullable: true })
   date_created: Date
@@ -28,23 +23,11 @@ export class WooCommerceProductEntity {
   @Column({ type: 'timestamp', nullable: true })
   date_modified: Date
 
-  @Column({ default: 'simple' })
-  type: string
-
-  @Column({ default: 'publish' })
-  status: string
-
-  @Column({ default: false })
-  featured: boolean
-
-  @Column({ default: 'visible' })
-  catalog_visibility: string
-
   @Column({ type: 'text', nullable: true })
   description: string
 
-  @Column({ type: 'text', nullable: true })
-  short_description: string
+  @Column({ nullable: true })
+  permalink: string
 
   @Column({ nullable: true })
   sku: string
@@ -58,20 +41,35 @@ export class WooCommerceProductEntity {
   @Column({ nullable: true })
   sale_price: string
 
+  @Column({ nullable: true })
+  date_on_sale_from: Date
+
+  @Column({ nullable: true })
+  date_on_sale_to: Date
+
   @Column({ default: false })
   on_sale: boolean
 
+  @Column({ default: 'publish' })
+  status: string
+
   @Column({ default: true })
   purchasable: boolean
-
-  @Column({ default: 0 })
-  total_sales: number
 
   @Column({ default: false })
   virtual: boolean
 
   @Column({ default: false })
   downloadable: boolean
+
+  @Column({ type: 'jsonb', nullable: true })
+  downloads: any[]
+
+  @Column({ default: -1 })
+  download_limit: number
+
+  @Column({ default: -1 })
+  download_expiry: number
 
   @Column({ default: 'taxable' })
   tax_status: string
@@ -80,7 +78,7 @@ export class WooCommerceProductEntity {
   tax_class: string
 
   @Column({ default: false })
-  manage_stock: boolean
+  manage_stock: boolean // Can be boolean or 'parent' in docs, but usually boolean in API response for variation specific
 
   @Column({ nullable: true })
   stock_quantity: number
@@ -91,53 +89,29 @@ export class WooCommerceProductEntity {
   @Column({ default: 'no' })
   backorders: string
 
+  @Column({ default: false })
+  backorders_allowed: boolean
+
+  @Column({ default: false })
+  backordered: boolean
+
   @Column({ nullable: true })
   weight: string
 
   @Column({ type: 'jsonb', nullable: true })
   dimensions: any
 
-  @Column({ default: true })
-  reviews_allowed: boolean
-
   @Column({ nullable: true })
-  average_rating: string
+  shipping_class: string
 
   @Column({ default: 0 })
-  rating_count: number
-
-  @Column({ type: 'simple-array', nullable: true })
-  related_ids: number[]
-
-  @Column({ type: 'simple-array', nullable: true })
-  upsell_ids: number[]
-
-  @Column({ type: 'simple-array', nullable: true })
-  cross_sell_ids: number[]
-
-  @Column({ default: 0 })
-  parent_id: number
+  shipping_class_id: number
 
   @Column({ type: 'jsonb', nullable: true })
-  categories: any[]
-
-  @Column({ type: 'jsonb', nullable: true })
-  tags: any[]
-
-  @Column({ type: 'jsonb', nullable: true })
-  images: any[]
+  image: any
 
   @Column({ type: 'jsonb', nullable: true })
   attributes: any[]
-
-  @Column({ type: 'jsonb', nullable: true })
-  default_attributes: any[]
-
-  @Column({ type: 'simple-array', nullable: true })
-  variations: number[]
-
-  @Column({ type: 'simple-array', nullable: true })
-  grouped_products: number[]
 
   @Column({ default: 0 })
   menu_order: number

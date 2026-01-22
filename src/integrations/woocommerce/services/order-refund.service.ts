@@ -35,6 +35,12 @@ export class OrderRefundService {
     return response.data
   }
 
+  async findAllRefunds(storeId: number, params?: any) {
+    const client = await this.clientService.getClient(storeId)
+    const response = await client.get('refunds', params)
+    return response.data
+  }
+
   async deleteRefund(storeId: number, orderId: number, refundId: number) {
     const client = await this.clientService.getClient(storeId)
     const response = await client.delete(`orders/${orderId}/refunds/${refundId}`, { force: true })

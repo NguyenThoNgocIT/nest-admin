@@ -13,7 +13,12 @@ import { ProductShippingClassController } from './controllers/product-shipping-c
 import { ProductTagController } from './controllers/product-tag.controller'
 import { ProductVariationController } from './controllers/product-variation.controller'
 import { ProductController } from './controllers/product.controller'
+import { RefundController } from './controllers/refund.controller'
+import { ReportController } from './controllers/report.controller'
 import { StoreController } from './controllers/store.controller'
+import { TaxClassController } from './controllers/tax-class.controller'
+import { TaxRateController } from './controllers/tax-rate.controller'
+import { WebhookController } from './controllers/webhook.controller'
 import { WooCommerceCouponEntity } from './entities/woocommerce-coupon.entity'
 import { WooCommerceCustomerEntity } from './entities/woocommerce-customer.entity'
 import { WooCommerceOrderNoteEntity } from './entities/woocommerce-order-note.entity'
@@ -28,6 +33,9 @@ import { WooCommerceProductTagEntity } from './entities/woocommerce-product-tag.
 import { WooCommerceProductVariationEntity } from './entities/woocommerce-product-variation.entity'
 import { WooCommerceProductEntity } from './entities/woocommerce-product.entity'
 import { WooCommerceStoreEntity } from './entities/woocommerce-store.entity'
+import { WooCommerceTaxClassEntity } from './entities/woocommerce-tax-class.entity'
+import { WooCommerceTaxRateEntity } from './entities/woocommerce-tax-rate.entity'
+import { WooCommerceWebhookEntity } from './entities/woocommerce-webhook.entity'
 import { CouponService } from './services/coupon.service'
 import { CustomerService } from './services/customer.service'
 import { OrderActionsService } from './services/order-actions.service'
@@ -41,7 +49,11 @@ import { ProductShippingClassService } from './services/product-shipping-class.s
 import { ProductTagService } from './services/product-tag.service'
 import { ProductVariationService } from './services/product-variation.service'
 import { ProductService } from './services/product.service'
+import { ReportService } from './services/report.service'
 import { StoreCredentialsService } from './services/store-credentials.service'
+import { TaxClassService } from './services/tax-class.service'
+import { TaxRateService } from './services/tax-rate.service'
+import { WebhookService } from './services/webhook.service'
 import { WooCommerceClientService } from './services/woocommerce-client.service'
 import { WooCommerceAdapter } from './woocommerce.adapter'
 
@@ -56,11 +68,14 @@ import { WooCommerceAdapter } from './woocommerce.adapter'
       WooCommerceProductCategoryEntity,
       WooCommerceProductShippingClassEntity,
       WooCommerceProductTagEntity,
+      WooCommerceTaxClassEntity,
+      WooCommerceTaxRateEntity,
       WooCommerceProductReviewEntity,
       WooCommerceOrderEntity,
       WooCommerceOrderNoteEntity,
       WooCommerceOrderRefundEntity,
       WooCommerceCouponEntity,
+      WooCommerceWebhookEntity,
       WooCommerceCustomerEntity,
     ]),
   ],
@@ -73,7 +88,12 @@ import { WooCommerceAdapter } from './woocommerce.adapter'
     ProductCategoryController,
     ProductShippingClassController,
     ProductTagController,
+    ReportController,
     ProductReviewController,
+    RefundController,
+    TaxRateController,
+    TaxClassController,
+    WebhookController,
     OrderController,
     CouponController,
     CustomerController,
@@ -91,6 +111,10 @@ import { WooCommerceAdapter } from './woocommerce.adapter'
     ProductShippingClassService,
     ProductTagService,
     ProductReviewService,
+    ReportService,
+    TaxRateService,
+    TaxClassService,
+    WebhookService,
     OrderService,
     OrderActionsService,
     OrderRefundService,
@@ -108,6 +132,10 @@ import { WooCommerceAdapter } from './woocommerce.adapter'
     ProductShippingClassService,
     ProductTagService,
     ProductReviewService,
+    ReportService,
+    TaxRateService,
+    TaxClassService,
+    WebhookService,
     OrderService,
     StoreCredentialsService,
     CouponService,

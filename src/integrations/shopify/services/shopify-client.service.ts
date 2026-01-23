@@ -17,6 +17,8 @@ export class ShopifyClientService {
     const apiKey = this.configService.get<string>('SHOPIFY_API_KEY')
     const apiSecretKey = this.configService.get<string>('SHOPIFY_API_SECRET')
     const hostName = this.configService.get<string>('APP_BASE_URL').replace(/^https?:\/\//, '')
+    const scopeEnv = this.configService.get<string>('SHOPIFY_SCOPES') || ''
+    const scopes = scopeEnv.split(',').map(s => s.trim()).filter(s => s.length > 0)
 
     if (!apiKey || !apiSecretKey) {
       this.logger.warn('Thiếu cấu hình SHOPIFY_API_KEY hoặc SHOPIFY_API_SECRET. Module Shopify có thể không hoạt động đúng.')

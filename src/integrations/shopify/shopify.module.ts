@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from '~/modules/auth/auth.module'
 import { ShopifyController } from './controllers/shopify.controller'
 import { ShopifyStoreEntity } from './entities/shopify-store.entity'
+import { ShopifyAdminService } from './services/shopify-admin.service'
 import { ShopifyClientService } from './services/shopify-client.service'
 import { ShopifyOAuthService } from './services/shopify-oauth.service'
 
@@ -19,6 +20,7 @@ import { ShopifyOAuthService } from './services/shopify-oauth.service'
   providers: [
     ShopifyClientService,
     ShopifyOAuthService,
+    ShopifyAdminService,
   ],
   exports: [
     ShopifyClientService,

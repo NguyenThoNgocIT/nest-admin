@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 import { AuthUser } from '~/modules/auth/decorators/auth-user.decorator'
@@ -29,6 +29,18 @@ export class ShopifyProductController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy chi tiết Product' })
+  async getProduct(
+    @Query('shop') shop: string,
+    @Param('id') id: string,
+    @AuthUser() user: IAuthUser,
+  ) {
+    const data = await this.shopifyProductService.getProduct(shop, id, user.uid)
+    return { data }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Tạo Product mới' })
   async createProduct(
@@ -39,6 +51,42 @@ export class ShopifyProductController {
     const data = await this.shopifyProductService.createProduct(
       shop,
       body,
+      user.uid,
+    )
+    return { data }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  @ApiOperation({ summary: 'Cập nhật Product' })
+  async updateProduct(
+    @Query('shop') shop: string,
+    @Param('id') id: string,
+    @Body() body: any,
+    @AuthUser() user: IAuthUser,
+  ) {
+    // Đảm bảo body có ID
+    const payload = { ...body, id: id.startsWith('gid://') ? id : `gid://shopify/Product/${id}` }
+
+    const data = await this.shopifyProductService.updateProduct(
+      shop,
+      payload,
+      user.uid,
+    )
+    return { data }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @ApiOperation({ summary: 'Xoá Product' })
+  async deleteProduct(
+    @Query('shop') shop: string,
+    @Param('id') id: string,
+    @AuthUser() user: IAuthUser,
+  ) {
+    const data = await this.shopifyProductService.deleteProduct(
+      shop,
+      id,
       user.uid,
     )
     return { data }

@@ -91,6 +91,109 @@ export class ShopifyProductService {
   }
 
   /**
+   * Lấy chi tiết 1 Product kèm Variants
+   */
+  async getProduct(shopDomain: string, productId: string, userId?: number) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const query = `
+      query GetProduct($id: ID!) {
+        product(id: $id) {
+          id
+          title
+          status
+          handle
+          totalInventory
+          descriptionHtml
+          tags
+          options {
+            name
+            values
+          }
+          variants(first: 10) {
+            edges {
+              node {
+                id
+                title
+                sku
+                price
+                inventoryQuantity
+                inventoryItem {
+                  id
+                }
+              }
+            }
+          }
+          images(first: 5) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    `
+
+    // Đảm bảo ID là GID
+    const gid = productId.startsWith('gid://') ? productId : `gid://shopify/Product/${productId}`
+
+    const response = await client.query({
+      data: {
+        query,
+        variables: { id: gid },
+      },
+    })
+
+    return response.body.data.product
+  }
+
+  /**
+   * Cập nhật Product
+   */
+  async updateProduct(shopDomain: string, productInput: any, userId?: number) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const mutation = `
+      mutation UpdateProduct($product: ProductUpdateInput!) {
+        productUpdate(product: $product) {
+          product {
+            id
+            title
+            status
+            handle
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: {
+          product: productInput,
+        },
+      },
+    })
+
+    const { productUpdate } = response.body.data
+
+    if (productUpdate.userErrors && productUpdate.userErrors.length > 0) {
+      const errors = productUpdate.userErrors.map(e => e.message).join(', ')
+      throw new Error(`Shopify Update Product Failed: ${errors}`)
+    }
+
+    return productUpdate.product
+  }
+
+  /**
    * Tạo Product mới
    */
   async createProduct(shopDomain: string, productInput: any, userId?: number) {
@@ -131,5 +234,36 @@ export class ShopifyProductService {
     }
 
     return productCreate.product
+  }
+
+  // xoá product
+  async deleteProduct(shopDomain: string, productId: string, userId?: number) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+    const mutation = `
+      mutation DeleteProduct($id: ID!) {
+        productDelete(id: $id) {
+          deletedProductId
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+    // Đảm bảo ID là GID
+    const gid = productId.startsWith('gid://') ? productId : `gid://shopify/Product/${productId}`
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: { id: gid },
+      },
+    })
+    const { productDelete } = response.body.data
+    if (productDelete.userErrors && productDelete.userErrors.length > 0) {
+      const errors = productDelete.userErrors.map(e => e.message).join(', ')
+      throw new Error(`Shopify Delete Product Failed: ${errors}`)
+    }
+    return productDelete.deletedProductId
   }
 }

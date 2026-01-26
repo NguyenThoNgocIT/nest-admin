@@ -77,7 +77,7 @@ export class ProductService {
 
   async duplicateProduct(storeId: number, productId: number) {
     const client = await this.clientService.getClient(storeId)
-    const response = await client.post(`products/${productId}/duplicate`)
+    const response = await client.post(`products/${productId}/duplicate`, {})
     await this.saveProductToDb(storeId, response.data)
     return response.data
   }

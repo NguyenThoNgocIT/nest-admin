@@ -2,11 +2,16 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from '~/modules/auth/auth.module'
-import { ShopifyController } from './controllers/shopify.controller'
+import { ShopifyAuthController } from './controllers/shopify-auth.controller'
+import { ShopifyOrderController } from './controllers/shopify-order.controller'
+import { ShopifyProductController } from './controllers/shopify-product.controller'
+import { ShopifyShopController } from './controllers/shopify-shop.controller'
 import { ShopifyStoreEntity } from './entities/shopify-store.entity'
-import { ShopifyAdminService } from './services/shopify-admin.service'
 import { ShopifyClientService } from './services/shopify-client.service'
 import { ShopifyOAuthService } from './services/shopify-oauth.service'
+import { ShopifyOrderService } from './services/shopify-order.service'
+import { ShopifyProductService } from './services/shopify-product.service'
+import { ShopifyShopService } from './services/shopify-shop.service'
 
 @Module({
   imports: [
@@ -15,16 +20,24 @@ import { ShopifyOAuthService } from './services/shopify-oauth.service'
     TypeOrmModule.forFeature([ShopifyStoreEntity]),
   ],
   controllers: [
-    ShopifyController,
+    ShopifyAuthController,
+    ShopifyShopController,
+    ShopifyProductController,
+    ShopifyOrderController,
   ],
   providers: [
     ShopifyClientService,
     ShopifyOAuthService,
-    ShopifyAdminService,
+    ShopifyProductService,
+    ShopifyOrderService,
+    ShopifyShopService,
   ],
   exports: [
     ShopifyClientService,
     ShopifyOAuthService,
+    ShopifyProductService,
+    ShopifyOrderService,
+    ShopifyShopService,
   ],
 })
 export class ShopifyModule { }

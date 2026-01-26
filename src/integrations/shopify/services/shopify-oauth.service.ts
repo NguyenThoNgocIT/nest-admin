@@ -50,7 +50,15 @@ export class ShopifyOAuthService {
   /**
    * Xử lý callback từ Shopify sau khi user đồng ý cấp quyền
    */
-  async handleCallback(shop: string, code: string, state: string): Promise<ShopifyStoreEntity> {
+  async handleCallback(shop: string, code: string, state: string, query?: Record<string, string>): Promise<ShopifyStoreEntity> {
+    // 1. Validate HMAC nếu có query object
+    if (query) {
+      const isValid = this.validateHmac(query)
+      if (!isValid) {
+        throw new Error('HMAC validation failed. Request might be forged.')
+      }
+    }
+
     const shopify = this.shopifyClient.getShopifyInstance()
     const cleanShop = shopify.utils.sanitizeShop(shop, true)
 
@@ -59,17 +67,7 @@ export class ShopifyOAuthService {
     }
 
     // Exchange code lấy access token
-    // Dùng library function: exchangeAccessToken
-    // Cần construct session object giả lập
-
     try {
-      // Note: Session object creation removed as it caused "not a constructor" error
-      // and is not needed for manual token exchange below.
-
-      // Token exchange
-      // Note: @shopify/shopify-api v9+ thay đổi cách exchange.
-      // Ta có thể dùng REST call thủ công nếu library quá cồng kềnh với req/res objects.
-
       // Manual Token Exchange (Gọn nhẹ hơn việc mock req/res cho library)
       const accessToken = await this.exchangeCodeForToken(cleanShop, code)
 
@@ -99,6 +97,37 @@ export class ShopifyOAuthService {
       this.logger.error(`Failed to handle Shopify callback: ${error.message}`, error.stack)
       throw error
     }
+  }
+
+  /**
+   * Validate HMAC từ Shopify
+   * Tham khảo: https://shopify.dev/docs/apps/build/authentication-authorization/cess-tokens/verify-user-authenticity
+   */
+  private validateHmac(query: Record<string, string>): boolean {
+    const { hmac, ...rest } = query
+    if (!hmac)
+      return false
+
+    // Sắp xếp keys và tạo chuỗi message
+    const message = Object.keys(rest)
+      .sort() // Sort keys a-z
+      .map(key => `${key}=${rest[key]}`)
+      .join('&')
+
+    const secret = process.env.SHOPIFY_API_SECRET
+    if (!secret)
+      throw new Error('SHOPIFY_API_SECRET is not defined')
+
+    const generatedHmac = crypto
+      .createHmac('sha256', secret)
+      .update(message)
+      .digest('hex')
+
+    // So sánh an toàn (timing-safe)
+    return crypto.timingSafeEqual(
+      Buffer.from(generatedHmac, 'utf-8'),
+      Buffer.from(hmac, 'utf-8'),
+    )
   }
 
   private async exchangeCodeForToken(shop: string, code: string): Promise<string> {

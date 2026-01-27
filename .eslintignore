@@ -1,0 +1,28 @@
+# Ignore patterns for ESLint
+# Project-specific paths
+dist
+node_modules
+coverage
+generated
+__data
+logs
+scripts
+types
+public
+assets
+
+# Configuration files
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Environment files
+.env
+.env.*
+
+# Build artifacts
+build
+out
+.next
+.nuxt
+.output

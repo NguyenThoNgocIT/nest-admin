@@ -1,13 +1,15 @@
 import { DynamicModule, ExistingProvider, Module } from '@nestjs/common'
 
+import { WooCommerceModule } from '~/integrations/woocommerce/woocommerce.module'
 import { LogModule } from '~/modules/system/log/log.module'
-import { SystemModule } from '~/modules/system/system.module'
 
+import { SystemModule } from '~/modules/system/system.module'
 import { EmailJob } from './jobs/email.job'
 import { HttpRequestJob } from './jobs/http-request.job'
 import { LogClearJob } from './jobs/log-clear.job'
+import { WooCommerceSyncJob } from './jobs/woocommerce-sync.job'
 
-const providers = [LogClearJob, HttpRequestJob, EmailJob]
+const providers = [LogClearJob, HttpRequestJob, EmailJob, WooCommerceSyncJob]
 
 /**
  * auto create alias
@@ -38,7 +40,7 @@ export class TasksModule {
     return {
       global: true,
       module: TasksModule,
-      imports: [SystemModule, LogModule],
+      imports: [SystemModule, LogModule, WooCommerceModule],
       providers: [...providers, ...aliasProviders],
       exports: aliasProviders,
     }

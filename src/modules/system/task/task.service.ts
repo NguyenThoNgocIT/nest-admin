@@ -75,9 +75,11 @@ export class TaskService implements OnModuleInit {
       'waiting',
       'completed',
     ])
-    jobs.forEach((j) => {
-      j.remove()
-    })
+    // 使用 obliterate 彻底清除队列，比逐个删除更高效且安全
+    // jobs.forEach((j) => {
+    //   j.remove()
+    // })
+    await (this.taskQueue as any).obliterate({ force: true })
 
     // 查找所有需要运行的任务
     const tasks = await this.taskRepository.findBy({ status: 1 })
@@ -200,6 +202,7 @@ export class TaskService implements OnModuleInit {
     if (task.limit > 0)
       repeat.limit = task.limit
 
+    this.logger.log(`Starting task: ${task.name} (${task.service})`, TaskService.name)
     const job = await this.taskQueue.add(
       { id: task.id, service: task.service, args: task.data },
       { jobId: task.id, removeOnComplete: true, removeOnFail: true, repeat },
@@ -242,11 +245,8 @@ export class TaskService implements OnModuleInit {
       'waiting',
       'completed',
     ])
-    jobs
-      .filter(j => j.data.id === task.id)
-      .forEach(async (j) => {
-        await j.remove()
-      })
+    const jobsToRemove = jobs.filter(j => j.data.id === task.id)
+    await Promise.all(jobsToRemove.map(j => j.remove()))
 
     // 在队列中删除当前任务
     await this.taskQueue.removeRepeatable(JSON.parse(task.jobOpts))

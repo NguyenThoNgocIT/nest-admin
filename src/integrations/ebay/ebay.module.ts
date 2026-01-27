@@ -1,30 +1,31 @@
-import { Module } from '@nestjs/common'
+// src/integrations/ebay/ebay.module.ts
 
-import { ConfigService } from '@nestjs/config'
-import EbayAuthToken from 'ebay-oauth-nodejs-client'
-import { EBAY_API_INSTANCE } from '../constants'
+import { HttpModule } from '@nestjs/axios'
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { AuthModule } from '~/modules/auth/auth.module'
+import { EbayController } from './controllers/ebay.controller'
+import { EbayStoreEntity } from './entities/ebay-store.entity'
+import { EbayClientService } from './services/ebay-client.service'
+import { EbayOAuthService } from './services/ebay-oauth.service'
+import { EbayOrderService } from './services/ebay-order.service'
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [
-    {
-      provide: EBAY_API_INSTANCE,
-      inject: [ConfigService],
-      // Khởi tạo EbayAuthToken với các thông tin từ ConfigService hoặc biến môi trường
-      useFactory: (ConfigService: ConfigService) => {
-        return new EbayAuthToken({
-          clientId: ConfigService.get('EBAY_CLIENT_ID') || process.env.EBAY_CLIENT_ID,
-          clientSecret: ConfigService.get('EBAY_CLIENT_SECRET') || process.env.EBAY_CLIENT_SECRET,
-          redirectUri: ConfigService.get('EBAY_REDIRECT_URI') || process.env.EBAY_REDIRECT_URI,
-
-        })
-      },
-    },
+  imports: [
+    TypeOrmModule.forFeature([EbayStoreEntity]),
+    HttpModule,
+    AuthModule,
   ],
-  // Nhớ export EBAY_API_INSTANCE để các module khác có thể dùng
-  exports: [EBAY_API_INSTANCE],
+  controllers: [EbayController],
+  providers: [
+    EbayOAuthService,
+    EbayClientService,
+    EbayOrderService,
+  ],
+  exports: [
+    EbayClientService,
+    EbayOrderService,
+  ],
 })
-export class EbayModule {
-
-}
+export class EbayModule {}

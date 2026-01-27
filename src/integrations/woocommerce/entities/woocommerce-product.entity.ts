@@ -94,7 +94,7 @@ export class WooCommerceProductEntity {
   @Column({ nullable: true })
   weight: string
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   dimensions: any
 
   @Column({ default: true })
@@ -118,19 +118,19 @@ export class WooCommerceProductEntity {
   @Column({ default: 0 })
   parent_id: number
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   categories: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   tags: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   images: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   attributes: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   default_attributes: any[]
 
   @Column({ type: 'simple-array', nullable: true })
@@ -142,7 +142,7 @@ export class WooCommerceProductEntity {
   @Column({ default: 0 })
   menu_order: number
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   meta_data: any[]
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

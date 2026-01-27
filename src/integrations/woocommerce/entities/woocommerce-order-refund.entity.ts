@@ -29,19 +29,19 @@ export class WooCommerceOrderRefundEntity {
   @Column({ default: false })
   refunded_payment: boolean
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   meta_data: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   line_items: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   tax_lines: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   shipping_lines: any[]
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   fee_lines: any[]
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

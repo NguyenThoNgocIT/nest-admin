@@ -62,7 +62,7 @@ export class WooCommerceProductVariationEntity {
   @Column({ default: false })
   downloadable: boolean
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   downloads: any[]
 
   @Column({ default: -1 })
@@ -98,7 +98,7 @@ export class WooCommerceProductVariationEntity {
   @Column({ nullable: true })
   weight: string
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   dimensions: any
 
   @Column({ nullable: true })
@@ -107,16 +107,16 @@ export class WooCommerceProductVariationEntity {
   @Column({ default: 0 })
   shipping_class_id: number
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   image: any
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   attributes: any[]
 
   @Column({ default: 0 })
   menu_order: number
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   meta_data: any[]
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

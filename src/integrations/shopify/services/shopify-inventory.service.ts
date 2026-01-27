@@ -158,4 +158,206 @@ export class ShopifyInventoryService {
 
     return inventoryAdjustQuantities.inventoryAdjustmentGroup
   }
+
+  /**
+   * Set số lượng OnHand (inventorySetOnHandQuantities)
+   * Đây là cách mới thay thế inventorySetQuantity deprecated
+   */
+  async setOnHandQuantities(
+    shopDomain: string,
+    inputs: Array<{
+      inventoryItemId: string
+      locationId: string
+      quantity: number
+    }>,
+    userId?: number,
+    reason = 'correction',
+  ) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const mutation = `
+      mutation InventorySetOnHandQuantities($input: InventorySetOnHandQuantitiesInput!) {
+        inventorySetOnHandQuantities(input: $input) {
+          inventoryAdjustmentGroup {
+            reason
+            changes {
+              name
+              delta
+              quantityAfterChange
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+
+    const setQuantities = inputs.map(i => ({
+      inventoryItemId: i.inventoryItemId,
+      locationId: i.locationId,
+      quantity: i.quantity,
+    }))
+
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: {
+          input: {
+            reason,
+            setQuantities,
+          },
+        },
+      },
+    })
+
+    const { inventorySetOnHandQuantities } = response.body.data
+    if (inventorySetOnHandQuantities.userErrors?.length) {
+      throw new Error(
+        `Set OnHand error: ${JSON.stringify(inventorySetOnHandQuantities.userErrors)}`,
+      )
+    }
+
+    return inventorySetOnHandQuantities.inventoryAdjustmentGroup
+  }
+
+  /**
+   * Activate inventory item at a location
+   */
+  async activateInventoryItem(
+    shopDomain: string,
+    inventoryItemId: string,
+    locationId: string,
+    userId?: number,
+  ) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const mutation = `
+      mutation InventoryActivate($inventoryItemId: ID!, $locationId: ID!) {
+        inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId) {
+          inventoryLevel {
+            id
+            quantities(names: ["available", "on_hand"]) {
+              name
+              quantity
+            }
+            location {
+              id
+              name
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: { inventoryItemId, locationId },
+      },
+    })
+
+    const { inventoryActivate } = response.body.data
+    if (inventoryActivate.userErrors?.length) {
+      throw new Error(`Activate error: ${JSON.stringify(inventoryActivate.userErrors)}`)
+    }
+
+    return inventoryActivate.inventoryLevel
+  }
+
+  /**
+   * Deactivate inventory item at a location
+   */
+  async deactivateInventoryItem(
+    shopDomain: string,
+    inventoryItemId: string,
+    locationId: string,
+    userId?: number,
+  ) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const mutation = `
+      mutation InventoryDeactivate($inventoryItemId: ID!, $locationId: ID!) {
+        inventoryDeactivate(inventoryItemId: $inventoryItemId, locationId: $locationId) {
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: { inventoryItemId, locationId },
+      },
+    })
+
+    const { inventoryDeactivate } = response.body.data
+    if (inventoryDeactivate.userErrors?.length) {
+      throw new Error(`Deactivate error: ${JSON.stringify(inventoryDeactivate.userErrors)}`)
+    }
+
+    return true
+  }
+
+  /**
+   * Lấy thông tin InventoryItem (cost, tracked, countryCode)
+   */
+  async getInventoryItem(shopDomain: string, inventoryItemId: string, userId?: number) {
+    const store = await this.findStore(shopDomain, userId)
+    const client = await this.shopifyClient.getGraphqlClient(store)
+
+    const query = `
+      query GetInventoryItem($id: ID!) {
+        inventoryItem(id: $id) {
+          id
+          sku
+          tracked
+          unitCost {
+            amount
+            currencyCode
+          }
+          countryCodeOfOrigin
+          provinceCodeOfOrigin
+          inventoryLevels(first: 20) {
+            edges {
+              node {
+                id
+                quantities(names: ["available", "on_hand", "committed"]) {
+                  name
+                  quantity
+                }
+                location {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+    const gid = inventoryItemId.startsWith('gid://')
+      ? inventoryItemId
+      : `gid://shopify/InventoryItem/${inventoryItemId}`
+
+    const response = await client.query({
+      data: {
+        query,
+        variables: { id: gid },
+      },
+    })
+
+    return response.body.data.inventoryItem
+  }
 }
